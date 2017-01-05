@@ -17,8 +17,8 @@ import (
 //   Hex.encodeHexString(baos.toByteArray)
 // }
 var vints = []struct {
-	b        []byte
-	expected int64
+	b []byte
+	i int64
 }{
 	{[]byte{0x00}, 0},
 	{[]byte{0x01}, 1},
@@ -41,10 +41,16 @@ var vints = []struct {
 
 func TestVInt(t *testing.T) {
 	for _, spec := range vints {
-		t.Run(strconv.FormatInt(spec.expected, 10), func(t *testing.T) {
+		t.Run("ReadVInt "+strconv.FormatInt(spec.i, 10), func(t *testing.T) {
 			res, err := ReadVInt(bytes.NewBuffer(spec.b))
 			assert.NoError(t, err, "ReadVInt should return successfully")
-			assert.Equal(t, spec.expected, res, "ReadVInt should return the correct result")
+			assert.Equal(t, spec.i, res, "ReadVInt should return the correct result")
+		})
+		t.Run("WriteVInt "+strconv.FormatInt(spec.i, 10), func(t *testing.T) {
+			var buf bytes.Buffer
+			err := WriteVInt(&buf, spec.i)
+			assert.NoError(t, err, "WriteVInt should return successfully")
+			assert.Equal(t, spec.b, buf.Bytes(), "WriteVInt should write the correct result")
 		})
 	}
 }
